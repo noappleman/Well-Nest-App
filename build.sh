@@ -22,7 +22,7 @@ pip install --no-cache-dir -r requirements.txt
 
 # Install Pillow with specific flags if needed
 pip uninstall -y Pillow || true
-CFLAGS="${CFLAGS} -mavx2" pip install --no-cache-dir --force-reinstall Pillow==10.0.0 --no-binary=:all:
+CFLAGS="${CFLAGS} -mavx2" pip install --no-cache-dir --force-reinstall Pillow==9.5.0 --no-binary=:all:
 
 if [ -d "migrations" ]; then
     echo "=== Running database migrations ==="
