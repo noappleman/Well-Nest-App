@@ -15,3 +15,5 @@ services:
         value: "app.py"
       - key: FLASK_ENV
         value: "production"
+      - key: PYTHONPATH
+        value: "/opt/render/project/src"
