@@ -1,19 +1,24 @@
 services:
   - type: web
     name: trytry
-    env: python
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn --config gunicorn_config.py app:app"
+    env: python3.9
+    region: sfo1  # Choose a region close to your users
+    buildCommand: |
+      chmod a+x build.sh &&
+      ./build.sh
+    startCommand: gunicorn --worker-tmp-dir /dev/shm --workers=4 --threads=2 --worker-class=gthread app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.13
       - key: PYTHONUNBUFFERED
         value: "true"
-      - key: GUNICORN_CMD_ARGS
-        value: "--worker-tmp-dir /dev/shm --workers=4 --threads=2 --worker-class=gthread"
       - key: FLASK_APP
         value: "app.py"
       - key: FLASK_ENV
         value: "production"
-      - key: PYTHONPATH
-        value: "/opt/render/project/src"
+      - key: PYTHONDONTWRITEBYTECODE
+        value: "1"
+      - key: LDFLAGS
+        value: "-L/usr/local/lib"
+      - key: CFLAGS
+        value: "-I/usr/local/include"
