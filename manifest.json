@@ -1,0 +1,13 @@
+{
+  "name": "trytry",
+  "type": "python",
+  "build_command": "./build.sh",
+  "start_command": "gunicorn --config gunicorn_config.py app:app",
+  "env": {
+    "PYTHON_VERSION": "3.9.13",
+    "PYTHONUNBUFFERED": "true",
+    "GUNICORN_CMD_ARGS": "--worker-tmp-dir /dev/shm --workers=4 --threads=2 --worker-class=gthread",
+    "FLASK_APP": "app.py",
+    "FLASK_ENV": "production"
+  }
+}
