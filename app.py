@@ -88,6 +88,11 @@ app.jinja_loader = ChoiceLoader([
 app.config['JSON_AS_ASCII'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
 
+# Session cookie security settings
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent client-side JavaScript from accessing cookies
+app.config['SESSION_COOKIE_SECURE'] = True    # Only send cookies over HTTPS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Prevent CSRF attacks
+
 # PostgreSQL configuration
 POSTGRES_USER = os.environ.get('POSTGRES_USER', 'isaac')
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', '')
@@ -191,6 +196,23 @@ csrf = CSRFProtect(app)
 login_manager.login_view = 'login'
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+# Add security headers to all responses
+@app.after_request
+def add_security_headers(response):
+    # Prevent clickjacking attacks
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    # Prevent MIME type sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    # Enable browser XSS filtering
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    # HTTPS strict transport security
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    # Referrer policy for privacy
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    # Permissions policy to limit features
+    response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
+    return response
 
 # WebAuthn configuration
 RP_ID = 'localhost'  # Should be your domain in production
@@ -1777,7 +1799,7 @@ def admin_edit_user(user_id):
             
             db.session.commit()
             flash(f'User "{user.username}" has been updated successfully.', 'success')
-            log_security_event('ADMIN_EDIT_SUCCESS', new_username, request.remote_addr, f'User updated: {', '.join(changes)}')
+            log_security_event('ADMIN_EDIT_SUCCESS', new_username, request.remote_addr, f"User updated: {', '.join(changes)}")
             return redirect(url_for('admin_dashboard'))
     
     return render_template('admin_edit_user.html', user=user)
